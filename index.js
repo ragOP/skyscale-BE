@@ -15,7 +15,7 @@ connectToDatabase(MONGO_URI);
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/payment/razorpay", async (req, res) => {
+app.post("/api/payment/razorpay", async (req, res) => {
   try {
     const { amount } = req.body;
     const razorpayOrder = await razorpay.orders.create({
