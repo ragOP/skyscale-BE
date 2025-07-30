@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -68,27 +68,25 @@ app.post("/api/create-order", async (req, res) => {
         message: "Invalid Payment",
       });
     }
-    const order = await orderModel.create(
-      {
-        amount,
-        orderId,
-        fullName: name,
-        email,
-        phoneNumber: phone,
-        dob: dateOfBirth,
-        gender,
-        placeOfBirth,
-        prefferedDateAndTime: preferredDateTime,
-        razorpayOrderId,
-        razorpayPaymentId,
-      },
-      { session }
-    );
+    const payload = {
+      amount,
+      orderId,
+      fullName: name,
+      email,
+      phoneNumber: phone,
+      dob: dateOfBirth,
+      gender,
+      placeOfBirth,
+      prefferedDateAndTime: preferredDateTime,
+      razorpayOrderId,
+      razorpayPaymentId,
+    };
+    const order = await orderModel.create([payload], { session });
     await session.commitTransaction();
     session.endSession();
     return res.status(200).json({
       success: true,
-      data: order,
+      data: order[0],
     });
   } catch (error) {
     await session.abortTransaction();
