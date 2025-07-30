@@ -95,6 +95,14 @@ app.post("/api/create-order", async (req, res) => {
   }
 });
 
+app.get("/api/get-orders", async (req, res) => {
+  const orders = await orderModel.find({});
+  return res.status(200).json({
+    success: true,
+    data: orders,
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
