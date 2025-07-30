@@ -27,15 +27,13 @@ const orderSchema = new mongoose.Schema({
   placeOfBirth: {
     type: String,
   },
-  nationality: {
-    type: String,
-  },
   orderDate: {
     type: Date,
     required: true,
+    default: Date.now,
   },
   prefferedDateAndTime: {
-    type: Date,
+    type: String,
     required: true,
   },
   amount: {
