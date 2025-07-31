@@ -19,15 +19,15 @@ const orderSchema = new mongoose.Schema({
   },
   dob: {
     type: Date,
-    default: null,
+    default: "",
   },
   gender: {
     type: String,
-    default: null,
+    default: "",
   },
   placeOfBirth: {
     type: String,
-    default: null,
+    default: "",
   },
   orderDate: {
     type: Date,
@@ -36,7 +36,6 @@ const orderSchema = new mongoose.Schema({
   },
   prefferedDateAndTime: {
     type: String,
-    required: true,
     default: "",
   },
   amount: {
