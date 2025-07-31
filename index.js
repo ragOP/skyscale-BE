@@ -55,6 +55,7 @@ app.post("/api/create-order", async (req, res) => {
     razorpayOrderId,
     razorpayPaymentId,
     razorpaySignature,
+    additionalProducts = [],
   } = req.body;
   try {
     const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET);
@@ -80,6 +81,8 @@ app.post("/api/create-order", async (req, res) => {
       prefferedDateAndTime: preferredDateTime,
       razorpayOrderId,
       razorpayPaymentId,
+      additionalProducts,
+      razorpaySignature,
     };
     const order = await orderModel.create([payload], { session });
     await session.commitTransaction();
