@@ -7,25 +7,27 @@ const orderSchema = new mongoose.Schema({
   },
   fullName: {
     type: String,
-    required: true,
+    default: "",
   },
   email: {
     type: String,
-    required: true,
+    default: "",
   },
   phoneNumber: {
     type: String,
-    required: true,
+    default: "",
   },
   dob: {
     type: Date,
-    required: true,
+    default: null,
   },
   gender: {
     type: String,
+    default: null,
   },
   placeOfBirth: {
     type: String,
+    default: null,
   },
   orderDate: {
     type: Date,
@@ -35,6 +37,7 @@ const orderSchema = new mongoose.Schema({
   prefferedDateAndTime: {
     type: String,
     required: true,
+    default: "",
   },
   amount: {
     type: Number,
