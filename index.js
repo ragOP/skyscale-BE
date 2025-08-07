@@ -317,12 +317,11 @@ app.post("/api/create-order4", async (req, res) => {
   const {
     amount,
     orderId,
-    name,
+    fullName,
     email,
-    phone,
-    dateOfBirth,
-    gender,
-    placeOfBirth,
+    phoneNumber,
+    profession,
+    remarks,
     razorpayOrderId,
     razorpayPaymentId,
     razorpaySignature,
@@ -343,16 +342,14 @@ app.post("/api/create-order4", async (req, res) => {
     const payload = {
       amount,
       orderId,
-      fullName: name,
+      fullName,
       email,
-      phoneNumber: phone,
-      dob: dateOfBirth,
-      gender,
-      placeOfBirth,
+      phoneNumber,
+      profession,
+      remarks,
       razorpayOrderId,
       razorpayPaymentId,
       additionalProducts,
-      razorpaySignature,
     };
     const order = await orderModel4.create([payload], { session });
     await session.commitTransaction();
