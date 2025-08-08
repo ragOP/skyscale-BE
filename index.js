@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 9005;
 const MONGO_URI = process.env.MONGO_URI;
 const { connectToDatabase } = require("./config/config");
 
