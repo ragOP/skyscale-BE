@@ -53,7 +53,7 @@ router.post("/create-order", async (req, res) => {
 });
 
 router.get("/get-orders", async (req, res) => {
-  const orders = await orderModel4.find({});
+  const orders = await orderModel4.find({}).sort({ createdAt: -1 });
   return res.status(200).json({
     success: true,
     data: orders,
