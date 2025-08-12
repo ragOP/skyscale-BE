@@ -54,7 +54,7 @@ router.post("/create-order", async (req, res) => {
   }
 });
 
-router.post("/create-order2", async (req, res) => {
+router.post("/create-order-phonepe", async (req, res) => {
   const {
     amount,
     orderId,
@@ -70,17 +70,6 @@ router.post("/create-order2", async (req, res) => {
     additionalProducts = [],
   } = req.body;
   try {
-    // const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET);
-    // hmac.update(razorpayOrderId + "|" + razorpayPaymentId);
-    // const generatedSignature = hmac.digest("hex");
-
-    // if (generatedSignature !== razorpaySignature) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     data: null,
-    //     message: "Invalid Payment",
-    //   });
-    // }
     const payload = {
       amount,
       orderId,
