@@ -35,6 +35,7 @@ app.use("/api/lander3", require("./routers/lander3/index"));
 // ---- Signature -----//
 app.use("/api/lander4", require("./routers/lander4/index"));
 
+app.use("/api/phonepe-v2", require("./routers/phonepeV2/index"));
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
