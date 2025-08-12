@@ -6,7 +6,8 @@ const { CFG, getAuthToken } = require("../../config/phonePeV2");
 
 // public redirect (can be same page for both success/failure; we’ll show status there)
 const PUBLIC_REDIRECT_URL =
-  process.env.PUBLIC_REDIRECT_URL || "http://localhost:5173/return";
+  // "http://easyastro.in";
+  "http://localhost:9002";
 
 /**
  * POST /api/phonepe-v2/pay
@@ -37,7 +38,7 @@ router.post("/pay", async (req, res) => {
       paymentFlow: {
         type: "PG_CHECKOUT",
         merchantUrls: {
-          redirectUrl: `${PUBLIC_REDIRECT_URL}?orderId=${merchantOrderId}`,
+          redirectUrl: `http://easyastro.in/temp-confirm?orderId=${merchantOrderId}`,
         },
         // OPTIONAL: control visible instruments at checkout
         // paymentModeConfig: { enabledPaymentModes: [ { type: "UPI_INTENT" }, { type: "CARD", cardTypes:["DEBIT_CARD","CREDIT_CARD"] } ] }
