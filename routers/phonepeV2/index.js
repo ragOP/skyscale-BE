@@ -38,7 +38,7 @@ router.post("/pay", async (req, res) => {
       paymentFlow: {
         type: "PG_CHECKOUT",
         merchantUrls: {
-          redirectUrl: `http://easyastro.in/temp-confirm?orderId=${merchantOrderId}`,
+          redirectUrl: `http://easyastro.in/order-confirmation?orderId=${merchantOrderId}`,
         },
         // OPTIONAL: control visible instruments at checkout
         // paymentModeConfig: { enabledPaymentModes: [ { type: "UPI_INTENT" }, { type: "CARD", cardTypes:["DEBIT_CARD","CREDIT_CARD"] } ] }
