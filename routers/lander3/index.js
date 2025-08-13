@@ -166,4 +166,12 @@ router.get("/get-orders", async (req, res) => {
   });
 });
 
+router.get("/get-orders-abd", async (req, res) => {
+  const orders = await orderModel3Abd.find({}).sort({ createdAt: -1 });
+  return res.status(200).json({
+    success: true,
+    data: orders,
+  });
+});
+
 module.exports = router;
