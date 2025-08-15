@@ -6,42 +6,80 @@ const crypto = require("crypto");
 const orderModel3 = require("../../models/oderModel3");
 const orderModel3Abd = require("../../models/oderModel3-abd");
 
-const { sendEmail } = require("../../utils/mailer"); // Nodemailer encapsulated
+// NEW: email log model
+const EmailLog = require("../../models/emailLog");
+
+const { sendEmail } = require("../../utils/mailer");
 const { orderConfirmationHTML } = require("../../emails/orderConfirmation");
 
-/** Helper: build & send confirmation email (fire-and-forget) */
-async function sendConfirmationEmail({ email, name, orderId, amount, additionalProducts = [] }) {
-  if (!email) {
-    console.warn("[order-email] No email provided; skipping send.");
-    return;
-  }
+/** Helper: send + log confirmation email (separate collection) */
+async function sendAndLogConfirmationEmail({
+  email,
+  name,
+  orderId,
+  amount,
+  additionalProducts = [],
+}) {
+  const adminBcc = process.env.ADMIN_ORDER_BCC || "";
 
-  // Minimal line items: single line with total; add-ons listed separately
-  const items = [{ title: "Soulmate Sketch Order", price: Number(amount || 0) }];
-
+  // minimal items summary (you can expand if you pass line items)
   const html = orderConfirmationHTML({
     customerName: name || "",
     orderId,
     amount: Number(amount || 0),
-    items,
+    items: [{ title: "Soulmate Sketch Order", price: Number(amount || 0) }],
     additionalProducts,
   });
 
-  // Optional admin BCC (set in .env)
-  const adminBcc = process.env.ADMIN_ORDER_BCC || "";
+  try {
+    const info = await sendEmail({
+      to: email,
+      subject: `Your AstraSoul Order is Confirmed (#${orderId})`,
+      html,
+      bcc: adminBcc || undefined,
+    });
 
-  await sendEmail({
-    to: email,
-    subject: `Your AstraSoul Order is Confirmed (#${orderId})`,
-    html,
-    // If you want BCC for internal tracking:
-    ...(adminBcc ? { bcc: adminBcc } : {}),
-  });
+    const accepted = Array.isArray(info.accepted) ? info.accepted : [];
+    const rejected = Array.isArray(info.rejected) ? info.rejected : [];
+    const status = accepted.length > 0 ? "accepted" : "rejected";
+
+    await EmailLog.create({
+      toEmail: email,
+      bcc: adminBcc,
+      subject: `Your AstraSoul Order is Confirmed (#${orderId})`,
+      orderId,
+      status,
+      accepted,
+      rejected,
+      response: info.response || "",
+      messageId: info.messageId || "",
+      meta: { amount: Number(amount || 0), name, additionalProducts },
+      sentAt: new Date(),
+    });
+
+    console.log(`[email-log] saved (${status}) for ${email} / ${orderId}`);
+  } catch (err) {
+    console.error("[order-email] send failed:", err?.message || err);
+    await EmailLog.create({
+      toEmail: email,
+      bcc: adminBcc,
+      subject: `Your AstraSoul Order is Confirmed (#${orderId})`,
+      orderId,
+      status: "error",
+      accepted: [],
+      rejected: [],
+      response: "",
+      messageId: "",
+      errorMessage: err?.message || String(err),
+      meta: { amount: Number(amount || 0), name, additionalProducts },
+      sentAt: new Date(),
+    });
+  }
 }
 
 /**
  * POST /api/lander3/create-order
- * Razorpay path: verifies signature, creates order, sends email
+ * Razorpay path: verifies signature, creates order, THEN logs email send
  */
 router.post("/create-order", async (req, res) => {
   const {
@@ -90,19 +128,18 @@ router.post("/create-order", async (req, res) => {
 
     const order = await orderModel3.create(payload);
 
-    // Send confirmation email (non-blocking)
+    // Send & log email (non-blocking)
     (async () => {
-      try {
-        await sendConfirmationEmail({
+      if (email) {
+        await sendAndLogConfirmationEmail({
           email,
           name,
           orderId: orderId || razorpayOrderId || `ORDER_${Date.now()}`,
           amount,
           additionalProducts,
         });
-        console.log(`[order-email] Confirmation sent to ${email}`);
-      } catch (mailErr) {
-        console.error("[order-email] Send failed:", mailErr?.message || mailErr);
+      } else {
+        console.warn("[order-email] no email in payload; skipping email + log");
       }
     })();
 
@@ -144,7 +181,9 @@ router.post("/create-order-abd", async (req, res) => {
       placeOfBirth,
       additionalProducts,
     };
+
     const order = await orderModel3Abd.create(payload);
+
     return res.status(200).json({
       success: true,
       data: order,
@@ -157,7 +196,6 @@ router.post("/create-order-abd", async (req, res) => {
 
 /**
  * DELETE /api/lander3/delete-order-abd/:id
- * Remove abandoned-cart record
  */
 router.delete("/delete-order-abd/:id", async (req, res) => {
   const { id } = req.params;
@@ -180,7 +218,7 @@ router.delete("/delete-order-abd/:id", async (req, res) => {
 
 /**
  * POST /api/lander3/create-order-phonepe
- * PhonePe path: creates order (no signature verification here), sends email
+ * PhonePe path: creates order (no signature verification here), THEN logs email send
  */
 router.post("/create-order-phonepe", async (req, res) => {
   const {
@@ -216,19 +254,18 @@ router.post("/create-order-phonepe", async (req, res) => {
 
     const order = await orderModel3.create(payload);
 
-    // Send confirmation email (non-blocking)
+    // Send & log email (non-blocking)
     (async () => {
-      try {
-        await sendConfirmationEmail({
+      if (email) {
+        await sendAndLogConfirmationEmail({
           email,
           name,
           orderId: orderId || `ORDER_${Date.now()}`,
           amount,
           additionalProducts,
         });
-        console.log(`[order-email] (PhonePe) Confirmation sent to ${email}`);
-      } catch (mailErr) {
-        console.error("[order-email] (PhonePe) Send failed:", mailErr?.message || mailErr);
+      } else {
+        console.warn("[order-email] no email in payload; skipping email + log");
       }
     })();
 
@@ -262,6 +299,38 @@ router.get("/get-orders-abd", async (req, res) => {
     success: true,
     data: orders,
   });
+});
+
+/**
+ * NEW: GET /api/lander3/get-email-sent
+ * Returns all email logs (accepted/rejected/error). You can filter by status or date.
+ * Optional query params:
+ *   ?status=accepted|rejected|error
+ *   ?from=2025-08-01&to=2025-08-15
+ *   ?orderId=xyz
+ *   ?email=user@example.com
+ */
+router.get("/get-email-sent", async (req, res) => {
+  try {
+    const { status, from, to, orderId, email } = req.query;
+    const q = {};
+
+    if (status) q.status = status;
+    if (orderId) q.orderId = orderId;
+    if (email) q.toEmail = email;
+
+    if (from || to) {
+      q.sentAt = {};
+      if (from) q.sentAt.$gte = new Date(from);
+      if (to) q.sentAt.$lte = new Date(to);
+    }
+
+    const logs = await EmailLog.find(q).sort({ sentAt: -1 });
+    return res.status(200).json({ success: true, data: logs });
+  } catch (err) {
+    console.error("get-email-sent error:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 module.exports = router;

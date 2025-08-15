@@ -3,9 +3,6 @@ const nodemailer = require("nodemailer");
 
 let _transporter = null;
 
-/**
- * Create or reuse a single SMTP transporter
- */
 function getTransporter() {
   if (_transporter) return _transporter;
 
@@ -35,8 +32,17 @@ function getTransporter() {
 }
 
 /**
- * Generic email sender (HTML + optional text)
- * @param {{to:string, subject:string, html:string, text?:string, fromEmail?:string, fromName?:string}} opts
+ * Send an email (HTML)
+ * @param {{
+ *   to:string,
+ *   subject:string,
+ *   html:string,
+ *   text?:string,
+ *   fromEmail?:string,
+ *   fromName?:string,
+ *   bcc?:string
+ * }} opts
+ * @returns {Promise<import("nodemailer").SentMessageInfo>}
  */
 async function sendEmail(opts) {
   const transporter = getTransporter();
@@ -49,8 +55,10 @@ async function sendEmail(opts) {
     subject: opts.subject,
     html: opts.html,
     text: opts.text || "",
+    bcc: opts.bcc || undefined,
   });
 
+  console.log("[mailer] Email sent:", info.messageId);
   return info;
 }
 
