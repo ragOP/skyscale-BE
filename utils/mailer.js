@@ -3,8 +3,20 @@ const nodemailer = require("nodemailer");
 
 let _transporter = null;
 
+function ensureEnv() {
+  const required = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_SECURE"];
+  const missing = required.filter((k) => !process.env[k] || String(process.env[k]).length === 0);
+  if (missing.length) {
+    const msg = `[mailer] Missing SMTP envs: ${missing.join(", ")}. Refusing to create transporter.`;
+    console.error(msg);
+    throw new Error(msg);
+  }
+}
+
 function getTransporter() {
   if (_transporter) return _transporter;
+
+  ensureEnv();
 
   const {
     SMTP_HOST,
@@ -14,14 +26,10 @@ function getTransporter() {
     SMTP_SECURE, // "true" or "false"
   } = process.env;
 
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-    console.warn("[mailer] Missing SMTP env vars. Email will fail until configured.");
-  }
-
   _transporter = nodemailer.createTransport({
     host: SMTP_HOST,
-    port: Number(SMTP_PORT || 587),
-    secure: String(SMTP_SECURE || "false") === "true", // true for 465
+    port: Number(SMTP_PORT),
+    secure: String(SMTP_SECURE) === "true", // true => 465, false => 587
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS,
@@ -32,7 +40,17 @@ function getTransporter() {
 }
 
 /**
- * Send an email (HTML)
+ * Quick SMTP connectivity check (doesn't send mail)
+ * @returns {Promise<boolean>}
+ */
+async function verifySmtp() {
+  const t = getTransporter();
+  await t.verify(); // throws if cannot connect/auth
+  return true;
+}
+
+/**
+ * Send an email
  * @param {{
  *   to:string,
  *   subject:string,
@@ -42,7 +60,6 @@ function getTransporter() {
  *   fromName?:string,
  *   bcc?:string
  * }} opts
- * @returns {Promise<import("nodemailer").SentMessageInfo>}
  */
 async function sendEmail(opts) {
   const transporter = getTransporter();
@@ -58,11 +75,8 @@ async function sendEmail(opts) {
     bcc: opts.bcc || undefined,
   });
 
-  console.log("[mailer] Email sent:", info.messageId);
+  console.log("[mailer] Email sent:", info.messageId, "accepted:", info.accepted, "rejected:", info.rejected);
   return info;
 }
 
-module.exports = {
-  getTransporter,
-  sendEmail,
-};
+module.exports = { getTransporter, sendEmail, verifySmtp };
