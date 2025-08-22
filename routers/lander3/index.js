@@ -192,22 +192,27 @@ router.post("/create-order-abd", async (req, res) => {
 /**
  * DELETE /api/lander3/delete-order-abd/:id
  */
-router.delete("/delete-order-abd/:id", async (req, res) => {
-  const { id } = req.params;
-  if (!id) return res.status(400).json({ success: false, error: "id required" });
+router.delete("/delete-order-abd", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ success: false, error: "email required" });
+  }
 
   try {
-    const order = await orderModel3Abd.findByIdAndDelete(id);
+    const result = await orderModel3Abd.deleteMany({ email });
+
     return res.status(200).json({
       success: true,
-      data: order,
-      message: "Abandoned Order deleted successfully",
+      deletedCount: result.deletedCount,
+      message: `${result.deletedCount} Abandoned Order(s) deleted successfully`,
     });
   } catch (error) {
     console.error("delete-order-abd error:", error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 });
+
 
 /**
  * POST /api/lander3/create-order-phonepe  (PhonePe path)
