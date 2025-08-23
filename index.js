@@ -35,7 +35,14 @@ app.use("/api/lander3", require("./routers/lander3/index"));
 // ---- Signature -----//
 app.use("/api/lander4", require("./routers/lander4/index"));
 
+// ---- Lander5 -----//
+app.use("/api/lander5", require("./routers/lander5/index"));
+
 app.use("/api/phonepe-v2", require("./routers/phonepeV2/index"));
+
+// ---- PayU Payment Gateway ----//
+app.use("/api/payu", require("./routers/payU/index"));
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

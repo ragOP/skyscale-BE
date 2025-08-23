@@ -16,6 +16,7 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "mongoose": "^8.17.0",
+    "payu-websdk": "^1.2.0",
     "razorpay": "^2.9.6"
   },
   "devDependencies": {
