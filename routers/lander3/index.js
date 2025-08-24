@@ -51,11 +51,11 @@ async function sendAndLogConfirmationEmailResend({
       bcc: adminBcc,
       subject: `Your AstraSoul Order is Confirmed (#${orderId})`,
       orderId,
-      status,                  // "accepted" if we got an id from Resend
+      status, // "accepted" if we got an id from Resend
       accepted: id ? [email] : [],
       rejected: [],
-      response: id,            // store the Resend message id here
-      messageId: id,           // also store in messageId
+      response: id, // store the Resend message id here
+      messageId: id, // also store in messageId
       errorMessage: "",
       meta: { amount: Number(amount || 0), name, additionalProducts },
       sentAt: new Date(),
@@ -142,7 +142,9 @@ router.post("/create-order", async (req, res) => {
           additionalProducts,
         });
       } else {
-        console.warn("[order-email] no email in payload; skipping Resend + log");
+        console.warn(
+          "[order-email] no email in payload; skipping Resend + log"
+        );
       }
     })();
 
@@ -182,6 +184,26 @@ router.post("/create-order-abd", async (req, res) => {
     };
     const order = await orderModel3Abd.create(payload);
 
+    if (order) {
+      const response = await fetch(
+        "https://scheduler-easy-astro.onrender.com/api/schedule-job/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error(
+          "Scheduler service responded with error:",
+          response.statusText
+        );
+      } else {
+        console.log("Scheduled job successfully");
+      }
+    }
+
     return res.status(200).json({ success: true, data: order });
   } catch (error) {
     console.error("create-order-abd error:", error);
@@ -192,23 +214,6 @@ router.post("/create-order-abd", async (req, res) => {
 /**
  * DELETE /api/lander3/delete-order-abd/:id
  */
-// router.delete("/delete-order-abd/:id", async (req, res) => {
-//   const { id } = req.params;
-//   if (!id) return res.status(400).json({ success: false, error: "id required" });
-
-//   try {
-//     const order = await orderModel3Abd.findByIdAndDelete(id);
-//     return res.status(200).json({
-//       success: true,
-//       data: order,
-//       message: "Abandoned Order deleted successfully",
-//     });
-//   } catch (error) {
-//     console.error("delete-order-abd error:", error);
-//     return res.status(500).json({ error: error.message });
-//   }
-// });
-
 router.delete("/delete-order-abd", async (req, res) => {
   const { email } = req.body;
 
@@ -219,6 +224,24 @@ router.delete("/delete-order-abd", async (req, res) => {
   try {
     const result = await orderModel3Abd.deleteMany({ email });
 
+    const response = await fetch(
+      "https://scheduler-easy-astro.onrender.com/api/schedule-job/delete",
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+    if (!response.ok) {
+      console.error(
+        "Scheduler service responded with error:",
+        response.statusText
+      );
+    } else {
+      console.log("Scheduled job successfully");
+    }
     return res.status(200).json({
       success: true,
       deletedCount: result.deletedCount,
@@ -278,7 +301,9 @@ router.post("/create-order-phonepe", async (req, res) => {
           additionalProducts,
         });
       } else {
-        console.warn("[order-email] no email in payload; skipping Resend + log");
+        console.warn(
+          "[order-email] no email in payload; skipping Resend + log"
+        );
       }
     })();
 
