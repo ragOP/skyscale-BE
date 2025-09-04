@@ -16,15 +16,15 @@ router.post("/create-order", async (req, res) => {
     razorpaySignature,
   } = req.body;
   try {
-    // const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET);
-    // hmac.update(razorpayOrderId + "|" + razorpayPaymentId);
-    // const generatedSignature = hmac.digest("hex");
+    const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET);
+    hmac.update(razorpayOrderId + "|" + razorpayPaymentId);
+    const generatedSignature = hmac.digest("hex");
 
-    // if (generatedSignature !== razorpaySignature) {
-    //   return res
-    //     .status(400)
-    //     .json({ success: false, message: "Invalid payment signature" });
-    // }
+    if (generatedSignature !== razorpaySignature) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid payment signature" });
+    }
 
     const data = {
       items,
