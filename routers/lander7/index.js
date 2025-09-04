@@ -184,25 +184,25 @@ router.post("/create-order-abd", async (req, res) => {
     };
     const order = await orderModel3Abd.create(payload);
 
-    if (order) {
-      const response = await fetch(
-        "https://scheduler-easy-astro.onrender.com/api/schedule-job/create",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
+    // if (order) {
+    //   const response = await fetch(
+    //     "https://scheduler-easy-astro.onrender.com/api/schedule-job/create",
+    //     {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({ email }),
+    //     }
+    //   );
 
-      if (!response.ok) {
-        console.error(
-          "Scheduler service responded with error:",
-          response.statusText
-        );
-      } else {
-        console.log("Scheduled job successfully");
-      }
-    }
+    //   if (!response.ok) {
+    //     console.error(
+    //       "Scheduler service responded with error:",
+    //       response.statusText
+    //     );
+    //   } else {
+    //     console.log("Scheduled job successfully");
+    //   }
+    // }
 
     return res.status(200).json({ success: true, data: order });
   } catch (error) {
