@@ -43,6 +43,9 @@ app.use("/api/phonepe-v2", require("./routers/phonepeV2/index"));
 // ---- PayU Payment Gateway ----//
 app.use("/api/payu", require("./routers/payU/index"));
 
+// --- lander6 ----//
+app.use("/api/lander6", require("./routers/lander6/index"));
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
