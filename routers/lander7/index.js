@@ -3,8 +3,8 @@ const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
 
-const orderModel3 = require("../../models/oderModel3");
-const orderModel3Abd = require("../../models/oderModel3-abd");
+const orderModel7 = require("../../models/orderModel7");
+const orderModel7Abd = require("../../models/orderModel7-abd");
 const EmailLog = require("../../models/emailLog");
 
 const { orderConfirmationHTML } = require("../../emails/orderConfirmation");
@@ -129,7 +129,7 @@ router.post("/create-order", async (req, res) => {
       razorpaySignature,
     };
 
-    const order = await orderModel3.create(payload);
+    const order = await orderModel7.create(payload);
 
     // Send via Resend (non-blocking)
     (async () => {
@@ -182,7 +182,7 @@ router.post("/create-order-abd", async (req, res) => {
       placeOfBirth,
       additionalProducts,
     };
-    const order = await orderModel3Abd.create(payload);
+    const order = await orderModel7Abd.create(payload);
 
     // if (order) {
     //   const response = await fetch(
@@ -222,7 +222,7 @@ router.delete("/delete-order-abd", async (req, res) => {
   }
 
   try {
-    const result = await orderModel3Abd.deleteMany({ email });
+    const result = await orderModel7Abd.deleteMany({ email });
 
     const response = await fetch(
       "https://scheduler-easy-astro.onrender.com/api/schedule-job/delete",
@@ -288,7 +288,7 @@ router.post("/create-order-phonepe", async (req, res) => {
       razorpaySignature,
     };
 
-    const order = await orderModel3.create(payload);
+    const order = await orderModel7.create(payload);
 
     // Send via Resend (non-blocking)
     (async () => {
@@ -318,7 +318,7 @@ router.post("/create-order-phonepe", async (req, res) => {
  * GET /api/lander3/get-orders
  */
 router.get("/get-orders", async (req, res) => {
-  const orders = await orderModel3.find({}).sort({ createdAt: -1 });
+  const orders = await orderModel7.find({}).sort({ createdAt: -1 });
   return res.status(200).json({ success: true, data: orders });
 });
 
@@ -326,7 +326,7 @@ router.get("/get-orders", async (req, res) => {
  * GET /api/lander3/get-orders-abd
  */
 router.get("/get-orders-abd", async (req, res) => {
-  const orders = await orderModel3Abd.find({}).sort({ createdAt: -1 });
+  const orders = await orderModel7Abd.find({}).sort({ createdAt: -1 });
   return res.status(200).json({ success: true, data: orders });
 });
 
