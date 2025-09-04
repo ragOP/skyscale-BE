@@ -38,6 +38,8 @@ app.use("/api/lander4", require("./routers/lander4/index"));
 // ---- Lander5 -----//
 app.use("/api/lander5", require("./routers/lander5/index"));
 
+app.use("/api/lander7", require("./routers/lander7/index"));
+
 app.use("/api/phonepe-v2", require("./routers/phonepeV2/index"));
 
 // ---- PayU Payment Gateway ----//
