@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
-
+const payuClient = require("../../config/payU");
 const orderModel3 = require("../../models/oderModel3");
 const orderModel3Abd = require("../../models/oderModel3-abd");
 const EmailLog = require("../../models/emailLog");
@@ -82,6 +82,25 @@ async function sendAndLogConfirmationEmailResend({
   }
 }
 
+router.get("/details", async (req, res) => {
+  const { txnid } = req.query;
+  const order = await orderModel3.findOne({ orderId: txnid });
+  if (!order) {
+    return res.status(404).json({ success: false, data: null, message: "Order not found" });
+  }
+  const orderDetails = {
+    orderId: order.orderId,
+    fullName: order.fullName,
+    email: order.email,
+    phoneNumber: order.phoneNumber,
+    dob: order.dob,
+    gender: order.gender,
+    placeOfBirth: order.placeOfBirth,
+    additionalProducts: order.additionalProducts,
+  };
+  return res.status(200).json({ success: true, data: orderDetails });
+});
+
 /**
  * POST /api/lander3/create-order  (Razorpay path)
  */
@@ -152,6 +171,63 @@ router.post("/create-order", async (req, res) => {
   } catch (error) {
     console.error("create-order error:", error);
     return res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/success", async (req, res) => {
+  try {
+    const { txnid, email, phone } = req.query;
+    if (!txnid) {
+      return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+    }
+
+    const paymentDetails = await payuClient.verifyPayment(txnid);
+    if (!paymentDetails) {
+      return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+    }
+
+    const txnKey = Object.keys(paymentDetails.transaction_details)[0];
+    const txn = paymentDetails.transaction_details[txnKey];
+
+    if (txn.status !== "success") {
+      return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+    }
+
+    const sperateAdditionalProducts = txn.udf4 ? txn.udf4.split(",") : [];
+
+    const payload = {
+      orderId: txn.txnid,
+      email: email || null,
+      fullName: txn.firstname || null,
+      amount: txn.amt || txn.transaction_amount || null,
+      phoneNumber: phone || null,
+      dob: txn.udf1 || null,
+      gender: txn.udf2 || null,
+      placeOfBirth: txn.udf3 || null,
+      additionalProducts: sperateAdditionalProducts || null,
+      orderDate: Date.now(),
+    };
+
+    const order = await orderModel3.create(payload);
+
+    (async () => {
+      if (email) {
+        await sendAndLogConfirmationEmailResend({
+          email: txn.email,
+          name: txn.firstname || "Customer",
+          orderId: txn.txnid || `ORDER_${Date.now()}`,
+          amount: txn.amt || txn.transaction_amount,
+          additionalProducts: sperateAdditionalProducts,
+        });
+      } else {
+        console.warn("[order-email] No email found; skipping Resend + log");
+      }
+    })();
+
+    return res.redirect(302, `https://www.easyastro.in/success?txnid=${txnid}`);
+  } catch (err) {
+    console.error("create-order error:", err);
+    return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
   }
 });
 
