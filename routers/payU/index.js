@@ -27,7 +27,7 @@ router.get("/pay", async (req, res) => {
       phone: phone,
       email: email,
       surl: `https://skyscale-be.onrender.com/api/lander3/success?txnid=${txnid}&email=${email}&phone=${phone}`,
-      furl: `https://skyscale-be.onrender.com/api/lander3/failure?txnid=${txnid}&email=${email}&phone=${phone}`,
+      furl: `https://skyscale-be.onrender.com/api/lander3/success?txnid=${txnid}&email=${email}&phone=${phone}`,
       udf1: dateOfBirth,
       udf2: gender,
       udf3: placeOfBirth,
