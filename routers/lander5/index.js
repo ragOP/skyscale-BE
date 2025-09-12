@@ -158,19 +158,19 @@ router.post("/success", async (req, res) => {
   try {
     const { txnid, email, phone } = req.query;
     if (!txnid) {
-      return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+      return res.redirect(302, `https://www.easyastro.in/sister2-fail?txnid=${txnid}`);
     }
 
     const paymentDetails = await payuClient.verifyPayment(txnid);
     if (!paymentDetails) {
-      return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+      return res.redirect(302, `https://www.easyastro.in/sister2-fail?txnid=${txnid}`);
     }
 
     const txnKey = Object.keys(paymentDetails.transaction_details)[0];
     const txn = paymentDetails.transaction_details[txnKey];
 
     if (txn.status !== "success") {
-      return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+      return res.redirect(302, `https://www.easyastro.in/sister2-fail?txnid=${txnid}`);
     }
 
     const sperateAdditionalProducts = txn.udf4 ? txn.udf4.split(",") : [];
@@ -204,10 +204,10 @@ router.post("/success", async (req, res) => {
       }
     })();
 
-    return res.redirect(302, `https://www.easyastro.in/success?txnid=${txnid}`);
+    return res.redirect(302, `https://www.easyastro.in/sister2-success?txnid=${txnid}`);
   } catch (err) {
     console.error("create-order error:", err);
-    return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+    return res.redirect(302, `https://www.easyastro.in/sister2-fail?txnid=${txnid}`);
   }
 });
 
