@@ -208,6 +208,12 @@ router.post("/success", async (req, res) => {
       orderDate: Date.now(),
     };
 
+    const checkIfOrderExists = await orderModel3.findOne({ orderId: txn.txnid });
+    if (checkIfOrderExists) {
+      console.log(`Order with orderId ${txn.txnid} already exists. Skipping creation.`);
+      return res.redirect(302, `https://www.easyastro.in/success?txnid=${txnid}`);
+    };
+
     const order = await orderModel3.create(payload);
 
     (async () => {
