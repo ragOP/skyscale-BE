@@ -48,6 +48,9 @@ app.use("/api/payu", require("./routers/payU/index"));
 // --- lander6 ----//
 app.use("/api/lander6", require("./routers/lander6/index"));
 
+//--landerMain -----//
+app.use("/api/landerMain", require("./routers/landerMain/index"));
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
