@@ -4,10 +4,20 @@ const nodemailer = require("nodemailer");
 let _transporter = null;
 
 function ensureEnv() {
-  const required = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_SECURE"];
-  const missing = required.filter((k) => !process.env[k] || String(process.env[k]).length === 0);
+  const required = [
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "SMTP_SECURE",
+  ];
+  const missing = required.filter(
+    (k) => !process.env[k] || String(process.env[k]).length === 0
+  );
   if (missing.length) {
-    const msg = `[mailer] Missing SMTP envs: ${missing.join(", ")}. Refusing to create transporter.`;
+    const msg = `[mailer] Missing SMTP envs: ${missing.join(
+      ", "
+    )}. Refusing to create transporter.`;
     console.error(msg);
     throw new Error(msg);
   }
@@ -45,7 +55,9 @@ function getTransporter() {
  */
 async function verifySmtp() {
   const t = getTransporter();
+
   await t.verify(); // throws if cannot connect/auth
+  // console.log("[mailer] Verifying SMTP connection...", "Success");
   return true;
 }
 
@@ -63,7 +75,8 @@ async function verifySmtp() {
  */
 async function sendEmail(opts) {
   const transporter = getTransporter();
-  const fromEmail = opts.fromEmail || process.env.FROM_EMAIL || "no-reply@example.com";
+  const fromEmail =
+    opts.fromEmail || process.env.FROM_EMAIL || "no-reply@example.com";
   const fromName = opts.fromName || process.env.FROM_NAME || "AstraSoul";
 
   const info = await transporter.sendMail({
@@ -75,7 +88,14 @@ async function sendEmail(opts) {
     bcc: opts.bcc || undefined,
   });
 
-  console.log("[mailer] Email sent:", info.messageId, "accepted:", info.accepted, "rejected:", info.rejected);
+  console.log(
+    "[mailer] Email sent:",
+    info.messageId,
+    "accepted:",
+    info.accepted,
+    "rejected:",
+    info.rejected
+  );
   return info;
 }
 

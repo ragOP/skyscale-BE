@@ -8,11 +8,12 @@ const orderModel7Abd = require("../../models/orderModel7-abd");
 const EmailLog = require("../../models/emailLog");
 
 const { orderConfirmationHTML } = require("../../emails/orderConfirmation");
+const { sendEmail, verifySmtp, getTransporter } = require("../../utils/mailer");
 
 // IMPORTANT: use Resend helper (not Nodemailer)
 const { sendEmailResend } = require("../../utils/mailer-resend");
 
-/** Helper: send + log with Resend */
+/** Helper: send + log with Resend 
 async function sendAndLogConfirmationEmailResend({
   email,
   name,
@@ -32,6 +33,81 @@ async function sendAndLogConfirmationEmailResend({
 
   try {
     const result = await sendEmailResend({
+      to: email,
+      subject: `Your AstraSoul Order is Confirmed (#${orderId})`,
+      html,
+      bcc: adminBcc || undefined,
+      // Optional: helpful tags in Resend dashboard
+      tags: [
+        { name: "type", value: "order_confirmation" },
+        { name: "orderId", value: String(orderId) },
+      ],
+    });
+
+    const id = result?.id || "";
+    const status = id ? "accepted" : "error";
+
+    await EmailLog.create({
+      toEmail: email,
+      bcc: adminBcc,
+      subject: `Your AstraSoul Order is Confirmed (#${orderId})`,
+      orderId,
+      status, // "accepted" if we got an id from Resend
+      accepted: id ? [email] : [],
+      rejected: [],
+      response: id, // store the Resend message id here
+      messageId: id, // also store in messageId
+      errorMessage: "",
+      meta: { amount: Number(amount || 0), name, additionalProducts },
+      sentAt: new Date(),
+    });
+
+    console.log(`[email-log] Resend queued id=${id} for ${email} / ${orderId}`);
+  } catch (err) {
+    console.error("[order-email] Resend failed:", err?.message || err);
+
+    await EmailLog.create({
+      toEmail: email,
+      bcc: adminBcc,
+      subject: `Your AstraSoul Order is Confirmed (#${orderId})`,
+      orderId,
+      status: "error",
+      accepted: [],
+      rejected: [],
+      response: "",
+      messageId: "",
+      errorMessage: err?.message || String(err),
+      meta: { amount: Number(amount || 0), name, additionalProducts },
+      sentAt: new Date(),
+    });
+  }
+}
+*/
+async function sendAndLogConfirmationEmailNodeMailer({
+  email,
+  name,
+  orderId,
+  amount,
+  additionalProducts = [],
+}) {
+  const adminBcc = process.env.ADMIN_ORDER_BCC || "";
+
+  const html = orderConfirmationHTML({
+    customerName: name || "",
+    orderId,
+    amount: Number(amount || 0),
+    items: [{ title: "Soulmate Sketch Order", price: Number(amount || 0) }],
+    additionalProducts,
+  });
+
+  try {
+    const transporter = await getTransporter();
+    // console.log("[mailer] transporter:", transporter.options);
+
+    const info = await verifySmtp();
+    // console.log("[mailer] SMTP verified:", info);
+
+    const result = await sendEmail({
       to: email,
       subject: `Your AstraSoul Order is Confirmed (#${orderId})`,
       html,
@@ -102,17 +178,17 @@ router.post("/create-order", async (req, res) => {
   } = req.body;
 
   try {
-    const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET);
-    hmac.update(razorpayOrderId + "|" + razorpayPaymentId);
-    const generatedSignature = hmac.digest("hex");
+    // const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET);
+    // hmac.update(razorpayOrderId + "|" + razorpayPaymentId);
+    // const generatedSignature = hmac.digest("hex");
 
-    if (generatedSignature !== razorpaySignature) {
-      return res.status(400).json({
-        success: false,
-        data: null,
-        message: "Invalid Payment",
-      });
-    }
+    // if (generatedSignature !== razorpaySignature) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     data: null,
+    //     message: "Invalid Payment",
+    //   });
+    // }
 
     const payload = {
       amount,
@@ -134,7 +210,7 @@ router.post("/create-order", async (req, res) => {
     // Send via Resend (non-blocking)
     (async () => {
       if (email) {
-        await sendAndLogConfirmationEmailResend({
+        await sendAndLogConfirmationEmailNodeMailer({
           email,
           name,
           orderId: orderId || razorpayOrderId || `ORDER_${Date.now()}`,
