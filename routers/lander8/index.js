@@ -145,7 +145,11 @@ router.get("/get-orders", async (req, res) => {
     }
     return res.status(200).json({
       success: true,
-      data: result,
+     data: {
+        result,
+        currentPage: page,
+        totalPages: Math.ceil((await orderModel8.countDocuments()) / limit),
+      },
       message: "All orders retrieved successfully",
     });
   } catch (error) {
@@ -161,7 +165,11 @@ router.get("/get-order/main", async (req, res) => {
     const orders = await orderModel8.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
     return res.status(200).json({
       success: true,
-      data: orders,
+      data: {
+        orders,
+        currentPage: page,
+        totalPages: Math.ceil((await orderModel8.countDocuments()) / limit),
+      },
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });

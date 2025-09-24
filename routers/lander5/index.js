@@ -52,11 +52,11 @@ async function sendAndLogConfirmationEmailResend({
       bcc: adminBcc,
       subject: `Your AstraSoul Order is Confirmed (#${orderId})`,
       orderId,
-      status,                  // "accepted" if we got an id from Resend
+      status, // "accepted" if we got an id from Resend
       accepted: id ? [email] : [],
       rejected: [],
-      response: id,            // store the Resend message id here
-      messageId: id,           // also store in messageId
+      response: id, // store the Resend message id here
+      messageId: id, // also store in messageId
       errorMessage: "",
       meta: { amount: Number(amount || 0), name, additionalProducts },
       sentAt: new Date(),
@@ -143,7 +143,9 @@ router.post("/create-order", async (req, res) => {
           additionalProducts,
         });
       } else {
-        console.warn("[order-email] no email in payload; skipping Resend + log");
+        console.warn(
+          "[order-email] no email in payload; skipping Resend + log"
+        );
       }
     })();
 
@@ -158,19 +160,28 @@ router.post("/success", async (req, res) => {
   try {
     const { txnid, email, phone } = req.query;
     if (!txnid) {
-      return res.redirect(302, `https://www.easyastro.in/sister2-fail?txnid=${txnid}`);
+      return res.redirect(
+        302,
+        `https://www.easyastro.in/sister2-fail?txnid=${txnid}`
+      );
     }
 
     const paymentDetails = await payuClient.verifyPayment(txnid);
     if (!paymentDetails) {
-      return res.redirect(302, `https://www.easyastro.in/sister2-fail?txnid=${txnid}`);
+      return res.redirect(
+        302,
+        `https://www.easyastro.in/sister2-fail?txnid=${txnid}`
+      );
     }
 
     const txnKey = Object.keys(paymentDetails.transaction_details)[0];
     const txn = paymentDetails.transaction_details[txnKey];
 
     if (txn.status !== "success") {
-      return res.redirect(302, `https://www.easyastro.in/sister2-fail?txnid=${txnid}`);
+      return res.redirect(
+        302,
+        `https://www.easyastro.in/sister2-fail?txnid=${txnid}`
+      );
     }
 
     const sperateAdditionalProducts = txn.udf4 ? txn.udf4.split(",") : [];
@@ -204,19 +215,26 @@ router.post("/success", async (req, res) => {
       }
     })();
 
-    return res.redirect(302, `https://www.easyastro.in/sister2-success?txnid=${txnid}`);
+    return res.redirect(
+      302,
+      `https://www.easyastro.in/sister2-success?txnid=${txnid}`
+    );
   } catch (err) {
     console.error("create-order error:", err);
-    return res.redirect(302, `https://www.easyastro.in/sister2-fail?txnid=${txnid}`);
+    return res.redirect(
+      302,
+      `https://www.easyastro.in/sister2-fail?txnid=${txnid}`
+    );
   }
 });
-
 
 router.get("/details", async (req, res) => {
   const { txnid } = req.query;
   const order = await orderModel5.findOne({ orderId: txnid });
   if (!order) {
-    return res.status(404).json({ success: false, data: null, message: "Order not found" });
+    return res
+      .status(404)
+      .json({ success: false, data: null, message: "Order not found" });
   }
   const orderDetails = {
     orderId: order.orderId,
@@ -339,7 +357,9 @@ router.post("/create-order-phonepe", async (req, res) => {
           additionalProducts,
         });
       } else {
-        console.warn("[order-email] no email in payload; skipping Resend + log");
+        console.warn(
+          "[order-email] no email in payload; skipping Resend + log"
+        );
       }
     })();
 
@@ -394,12 +414,20 @@ router.get("/get-email-sent", async (req, res) => {
 });
 
 router.get("/get-order/main", async (req, res) => {
-  const {page = 1, limit=100} = req.query;
+  const { page = 1, limit = 100 } = req.query;
   try {
-    const orders = await orderModel5.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
+    const orders = await orderModel5
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
     return res.status(200).json({
       success: true,
-      data: orders,
+      data: {
+        orders,
+        currentPage: page,
+        totalPages: Math.ceil((await orderModel5.countDocuments()) / limit),
+      },
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -407,16 +435,24 @@ router.get("/get-order/main", async (req, res) => {
 });
 
 router.get("/get-order/main-abd", async (req, res) => {
-  const {page = 1, limit=100} = req.query;
+  const { page = 1, limit = 100 } = req.query;
   try {
-    const orders = await orderModel5Abd.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
+    const orders = await orderModel5Abd
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
     return res.status(200).json({
       success: true,
-      data: orders,
+      data: {
+        orders,
+        currentPage: page,
+        totalPages: Math.ceil((await orderModel5Abd.countDocuments()) / limit),
+      },
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 });
 
-module.exports = router; 
+module.exports = router;

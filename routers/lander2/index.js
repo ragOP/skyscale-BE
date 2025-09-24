@@ -58,17 +58,29 @@ router.get("/get-orders", async (req, res) => {
   const orders = await orderModel2.find({}).sort({ createdAt: -1 });
   return res.status(200).json({
     success: true,
-    data: orders,
+    data: {
+      orders,
+      currentPage: page,
+      totalPages: Math.ceil((await orderModel2.countDocuments()) / limit),
+    },
   });
 });
 
 router.get("/get-order/main", async (req, res) => {
-  const {page = 1, limit=100} = req.query;
+  const { page = 1, limit = 100 } = req.query;
   try {
-    const orders = await orderModel2.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
+    const orders = await orderModel2
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
     return res.status(200).json({
       success: true,
-      data: orders,
+      data: {
+        orders,
+        currentPage: page,
+        totalPages: Math.ceil((await orderModel2.countDocuments()) / limit),
+      },
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });

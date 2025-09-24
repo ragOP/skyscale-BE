@@ -86,7 +86,9 @@ router.get("/details", async (req, res) => {
   const { txnid } = req.query;
   const order = await orderModel3.findOne({ orderId: txnid });
   if (!order) {
-    return res.status(404).json({ success: false, data: null, message: "Order not found" });
+    return res
+      .status(404)
+      .json({ success: false, data: null, message: "Order not found" });
   }
   const orderDetails = {
     orderId: order.orderId,
@@ -178,19 +180,28 @@ router.post("/success", async (req, res) => {
   try {
     const { txnid, email, phone } = req.query;
     if (!txnid) {
-      return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+      return res.redirect(
+        302,
+        `https://www.easyastro.in/failure?txnid=${txnid}`
+      );
     }
 
     const paymentDetails = await payuClient.verifyPayment(txnid);
     if (!paymentDetails) {
-      return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+      return res.redirect(
+        302,
+        `https://www.easyastro.in/failure?txnid=${txnid}`
+      );
     }
 
     const txnKey = Object.keys(paymentDetails.transaction_details)[0];
     const txn = paymentDetails.transaction_details[txnKey];
 
     if (txn.status !== "success") {
-      return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+      return res.redirect(
+        302,
+        `https://www.easyastro.in/failure?txnid=${txnid}`
+      );
     }
 
     const sperateAdditionalProducts = txn.udf4 ? txn.udf4.split(",") : [];
@@ -208,11 +219,18 @@ router.post("/success", async (req, res) => {
       orderDate: Date.now(),
     };
 
-    const checkIfOrderExists = await orderModel3.findOne({ orderId: txn.txnid });
+    const checkIfOrderExists = await orderModel3.findOne({
+      orderId: txn.txnid,
+    });
     if (checkIfOrderExists) {
-      console.log(`Order with orderId ${txn.txnid} already exists. Skipping creation.`);
-      return res.redirect(302, `https://www.easyastro.in/success?txnid=${txnid}`);
-    };
+      console.log(
+        `Order with orderId ${txn.txnid} already exists. Skipping creation.`
+      );
+      return res.redirect(
+        302,
+        `https://www.easyastro.in/success?txnid=${txnid}`
+      );
+    }
 
     const order = await orderModel3.create(payload);
 
@@ -440,12 +458,20 @@ router.get("/get-email-sent", async (req, res) => {
 });
 
 router.get("/get-order/main", async (req, res) => {
-  const {page = 1, limit=100} = req.query;
+  const { page = 1, limit = 100 } = req.query;
   try {
-    const orders = await orderModel3.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
+    const orders = await orderModel3
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
     return res.status(200).json({
       success: true,
-      data: orders,
+      data: {
+        orders,
+        currentPage: page,
+        totalPages: Math.ceil((await orderModel3.countDocuments()) / limit),
+      },
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -453,12 +479,20 @@ router.get("/get-order/main", async (req, res) => {
 });
 
 router.get("/get-order/main-abd", async (req, res) => {
-  const {page = 1, limit=100} = req.query;
+  const { page = 1, limit = 100 } = req.query;
   try {
-    const orders = await orderModel3Abd.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
+    const orders = await orderModel3Abd
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
     return res.status(200).json({
       success: true,
-      data: orders,
+      data: {
+        orders,
+        currentPage: page,
+        totalPages: Math.ceil((await orderModel3Abd.countDocuments()) / limit),
+      },
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
