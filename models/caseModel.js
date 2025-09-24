@@ -5,6 +5,7 @@ const caseSchema = new Schema(
     name: { type: String, required: true },
     phoneNumber: { type: String, required: true },
     score: { type: Number, required: true },
+    ms: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
