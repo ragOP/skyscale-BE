@@ -3,9 +3,9 @@ const caseModel = require("../../models/caseModel");
 const router = express.Router();
 
 router.post("/create-record", async (req, res) => {
-    const {name, phoneNumber, score} = req.body;
+    const {name, phoneNumber, score, ms} = req.body;
     try {
-        const payload = {name, phoneNumber, score};
+        const payload = {name, phoneNumber, score, ms};
         const record = await caseModel.create(payload);
         return res.status(200).json({
             success: true,
