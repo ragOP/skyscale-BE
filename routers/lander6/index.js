@@ -149,4 +149,30 @@ router.get("/get-orders", async (req, res) => {
   }
 });
 
+router.get("/get-order/main", async (req, res) => {
+  const {page = 1, limit=100} = req.query;
+  try {
+    const orders = await orderModel6.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
+    return res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/get-order/main-abd", async (req, res) => {
+  const {page = 1, limit=100} = req.query;
+  try {
+    const orders = await AbondentOrder2.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
+    return res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
