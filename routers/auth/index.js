@@ -35,4 +35,22 @@ router.get('/get-all', async (req, res) => {
     return res.status(200).json({ message: 'Users retrieved successfully', users });
 });
 
+router.route('/delete/:id', async (req, res) => {
+    const { id } = req.params;
+    const response = await authModel.findByIdAndDelete(id);
+    if (!response) {
+        return res.status(400).json({ message: 'Delete failed' });
+    }
+    return res.status(200).json({ message: 'User deleted successfully', user: response });
+});
+
+router.get('/get/:id', async (req, res) => {
+    const { id } = req.params;
+    const user = await authModel.findById(id);
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+    return res.status(200).json({ message: 'User retrieved successfully', user });
+});
+
 module.exports = router;
