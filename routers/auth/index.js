@@ -30,4 +30,9 @@ router.put('/update/:id', async (req, res) => {
     return res.status(200).json({ message: 'User updated successfully', user: response });
 });
 
+router.get('/get-all', async (req, res) => {
+    const users = await authModel.find();
+    return res.status(200).json({ message: 'Users retrieved successfully', users });
+});
+
 module.exports = router;
