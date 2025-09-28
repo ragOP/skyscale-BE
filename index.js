@@ -56,6 +56,9 @@ app.use("/api/lander8", require("./routers/lander8/index"));
 
 app.use("/api/case", require("./routers/case/index"));
 
+// ---------------- Auth Router ------------------//
+app.use("/api/auth", require("./routers/auth/index"));
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
