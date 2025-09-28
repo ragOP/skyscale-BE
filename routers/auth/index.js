@@ -35,7 +35,7 @@ router.get('/get-all', async (req, res) => {
     return res.status(200).json({ message: 'Users retrieved successfully', users });
 });
 
-router.route('/delete/:id', async (req, res) => {
+router.delete('/delete/:id', async (req, res) => {
     const { id } = req.params;
     const response = await authModel.findByIdAndDelete(id);
     if (!response) {
