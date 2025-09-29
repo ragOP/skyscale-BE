@@ -1,5 +1,13 @@
 const express = require('express');
 const authModel = require('../../models/authModel');
+const orderModel = require('../../models/orderModel');
+const orderMode2 = require('../../models/oderModel2');
+const orderMode3 = require('../../models/oderModel3');
+const orderMode7 = require('../../models/orderModel7');
+const abondentOrder2 = require('../../models/abondentOrder2');
+const oderModel3ABD = require('../../models/oderModel3-abd');
+const orderModel7ABD = require('../../models/orderModel7-abd');
+
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
@@ -51,6 +59,79 @@ router.get('/get/:id', async (req, res) => {
         return res.status(404).json({ message: 'User not found' });
     }
     return res.status(200).json({ message: 'User retrieved successfully', user });
+});
+
+router.route("/get-stats/record").get(async (req, res) => {
+    try {
+        const query = {
+            createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 1)) }
+        };
+        const lander1 = await orderModel.find(query).select("createdAt");
+        const lander1Count = lander1.length;
+        const lander2 = await orderMode2.find(query).select("createdAt");
+        const lander2Count = lander2.length;
+        const lander3 = await orderMode3.find(query).select("createdAt");
+        const lander3Count = lander3.length;
+        const lander7 = await orderMode7.find(query).select("createdAt");
+        const lander7Count = lander7.length;
+        return res.status(200).json({ message: 'User statistics retrieved successfully', stats: { lander1:{
+            count: lander1Count,
+            title: "Astra Soul",
+            lastOrderTime: lander1.length ? lander1[lander1.length - 1].createdAt : null
+        }, lander2: {
+            count: lander2Count,
+            title: "AstraSoul Love",
+            lastOrderTime: lander2.length ? lander2[lander2.length - 1].createdAt : null
+        }, lander3: {
+            count: lander3Count,
+            title: "Easy Astro",
+            lastOrderTime: lander3.length ? lander3[lander3.length - 1].createdAt : null
+        }, lander7: {
+            count: lander7Count,
+            title: "Easy Astro Exp",
+            lastOrderTime: lander7.length ? lander7[lander7.length - 1].createdAt : null
+        }, lander8: {
+            count: lander3Count,
+            title: "Soul Mate Sketch",
+            lastOrderTime: lander3.length ? lander3[lander3.length - 1].createdAt : null
+        } } });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error retrieving user statistics', error });
+    }
+});
+
+router.route("/get-stats/abandoned").get(async (req, res) => {
+    try {
+        const query = {
+            createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 1)) }
+        };
+        const lander2 = await abondentOrder2.find(query).select("createdAt");
+        const lander2Count = lander2.length;
+        const lander3 = await oderModel3ABD.find(query).select("createdAt");
+        const lander3Count = lander3.length;
+        const lander7 = await orderModel7ABD.find(query).select("createdAt");
+        const lander7Count = lander7.length;
+        console.log("lander7", lander7);
+        return res.status(200).json({ message: 'User statistics retrieved successfully', stats: { lander2: {
+            count: lander2Count,
+            title: "AstraSoul Love",
+            lastOrderTime: lander2.length ? lander2[lander2.length - 1].createdAt : null
+        }, lander3: {
+            count: lander3Count,
+            title: "Easy Astro",
+            lastOrderTime: lander3.length ? lander3[lander3.length - 1].createdAt : null
+        }, lander7: {
+            count: lander7Count,
+            title: "Easy Astro Exp",
+            lastOrderTime: lander7.length ? lander7[lander7.length - 1].createdAt : null
+        }, lander8: {
+            count: lander3Count,
+            title: "Soul Mate Sketch",
+            lastOrderTime: lander3.length ? lander3[lander3.length - 1].createdAt : null
+        } } });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error retrieving user statistics', error });
+    }
 });
 
 module.exports = router;
