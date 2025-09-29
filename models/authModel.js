@@ -17,7 +17,7 @@ const authSchema = new schema({
     }, 
     role: {
         type: String,
-        enum: ['admin', 'signature', 'astro'],
+        enum: ['admin', 'signature', 'astro', 'astra'],
         default: 'admin'
     }
 });
