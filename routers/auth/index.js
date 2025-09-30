@@ -134,4 +134,50 @@ router.route("/get-stats/abandoned").get(async (req, res) => {
     }
 });
 
+router.route("/create-password").post(async (req, res) => {
+    try {
+        const { title, id, password, remarks, others } = req.body;
+        const newPassword = await passwordModel.create({ title, id, password, remarks, others });
+        return res.status(201).json({ message: 'Password created successfully', password: newPassword });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error creating password', error });
+    }
+});
+
+router.route("/get-passwords").get(async (req, res) => {
+    try {
+        const passwords = await passwordModel.find();
+        return res.status(200).json({ message: 'Passwords retrieved successfully', passwords });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error retrieving passwords', error });
+    }
+});
+
+router.route("/delete-password/:id").delete(async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedPassword = await passwordModel.findByIdAndDelete(id);
+        if (!deletedPassword) {
+            return res.status(404).json({ message: 'Password not found' });
+        }
+        return res.status(200).json({ message: 'Password deleted successfully', password: deletedPassword });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error deleting password', error });
+    }   
+});
+
+router.route("/update-password/:id").put(async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+        const updatedPassword = await passwordModel.findByIdAndUpdate(id, updates, { new: true });
+        if (!updatedPassword) {
+            return res.status(404).json({ message: 'Password not found' });
+        }   
+        return res.status(200).json({ message: 'Password updated successfully', password: updatedPassword });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error updating password', error });
+    }   
+});
+
 module.exports = router;
