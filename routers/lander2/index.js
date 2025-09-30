@@ -58,11 +58,7 @@ router.get("/get-orders", async (req, res) => {
   const orders = await orderModel2.find({}).sort({ createdAt: -1 });
   return res.status(200).json({
     success: true,
-    data: {
-      orders,
-      currentPage: page,
-      totalPages: Math.ceil((await orderModel2.countDocuments()) / limit),
-    },
+    data: orders,
   });
 });
 
