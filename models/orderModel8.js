@@ -47,6 +47,10 @@ const orderSchema = new Schema(
       type: [String],
       default: [],
     },
+    deliveryStatusEmail: {
+    type: Boolean,
+    default: false,
+  },
   },
   { timestamps: true }
 );

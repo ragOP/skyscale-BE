@@ -18,7 +18,12 @@ const order6Schema = new Schema(
     razorPayOrderId: { type: String },
     razorPayPaymentId: { type: String },
     razorPaySignatureId: { type: String },
+    deliveryStatusEmail: {
+    type: Boolean,
+    default: false,
   },
+  },
+  
   { timestamps: true }
 );
 

@@ -48,6 +48,14 @@ const orderSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  deliveryStatusEmail: {
+    type: Boolean,
+    default: false,
+  },
+  deliveryStatusEmail: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Order7", orderSchema);
