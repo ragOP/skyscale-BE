@@ -26,6 +26,14 @@ router.post("/create-order", async (req, res) => {
         .json({ success: false, message: "Invalid payment signature" });
     }
 
+    const existingOrder = await orderModel6.findOne({ orderId });
+              if (existingOrder) {
+              return res.status(200).json({
+                success: true,
+                data: existingOrder,
+              });
+            }
+
     const data = {
       items,
       orderId,

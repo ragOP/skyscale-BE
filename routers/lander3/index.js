@@ -135,6 +135,14 @@ router.post("/create-order", async (req, res) => {
       });
     }
 
+    const existingOrder = await orderModel3.findOne({ orderId });
+      if (existingOrder) {
+      return res.status(200).json({
+        success: true,
+        data: existingOrder,
+      });
+    }
+
     const payload = {
       amount,
       orderId,

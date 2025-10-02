@@ -29,6 +29,13 @@ router.post("/create-order", async (req, res) => {
         message: "Invalid Payment",
       });
     }
+    const existingOrder = await orderModel4.findOne({ orderId });
+          if (existingOrder) {
+          return res.status(200).json({
+            success: true,
+            data: existingOrder,
+          });
+        }
     const payload = {
       amount,
       orderId,
