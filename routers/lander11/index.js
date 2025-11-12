@@ -190,7 +190,7 @@ router.post("/success", async (req, res) => {
     if (!txnid) {
       return res.redirect(
         302,
-        `https://www.easyastro.in/failure?txnid=${txnid}`
+        `https://www.easyastro.in/failure-cousin?txnid=${txnid}`
       );
     }
 
@@ -198,7 +198,7 @@ router.post("/success", async (req, res) => {
     if (!paymentDetails) {
       return res.redirect(
         302,
-        `https://www.easyastro.in/failure?txnid=${txnid}`
+        `https://www.easyastro.in/failure-cousin?txnid=${txnid}`
       );
     }
 
@@ -208,7 +208,7 @@ router.post("/success", async (req, res) => {
     if (txn.status !== "success") {
       return res.redirect(
         302,
-        `https://www.easyastro.in/failure?txnid=${txnid}`
+        `https://www.easyastro.in/failure-cousin?txnid=${txnid}`
       );
     }
 
@@ -236,7 +236,7 @@ router.post("/success", async (req, res) => {
       );
       return res.redirect(
         302,
-        `https://www.easyastro.in/success?txnid=${txnid}`
+        `https://www.easyastro.in/success-cousin?txnid=${txnid}`
       );
     }
 
@@ -256,10 +256,10 @@ router.post("/success", async (req, res) => {
       }
     })();
 
-    return res.redirect(302, `https://www.easyastro.in/success?txnid=${txnid}`);
+    return res.redirect(302, `https://www.easyastro.in/success-cousin?txnid=${txnid}`);
   } catch (err) {
     console.error("create-order error:", err);
-    return res.redirect(302, `https://www.easyastro.in/failure?txnid=${txnid}`);
+    return res.redirect(302, `https://www.easyastro.in/failure-cousin?txnid=${txnid}`);
   }
 });
 
