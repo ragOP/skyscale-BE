@@ -236,7 +236,7 @@ router.post("/success", async (req, res) => {
       );
       return res.redirect(
         302,
-        `https://www.easyastro.in/success-cousin?txnid=${txnid}`
+        `https://www.easyastro.in/success-hindi?txnid=${txnid}`
       );
     }
 
@@ -256,7 +256,7 @@ router.post("/success", async (req, res) => {
       }
     })();
 
-    return res.redirect(302, `https://www.easyastro.in/success-cousin?txnid=${txnid}`);
+    return res.redirect(302, `https://www.easyastro.in/success-hindi?txnid=${txnid}`);
   } catch (err) {
     console.error("create-order error:", err);
     return res.redirect(302, `https://www.easyastro.in/failure-cousin?txnid=${txnid}`);
