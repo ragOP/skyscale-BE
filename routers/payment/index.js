@@ -4,6 +4,7 @@ const razorpay = require("../../config/razorpay");
 
 router.post("/razorpay", async (req, res) => {
   try {
+    console.log("Request Body:", req.body); // Debugging line
     const { amount } = req.body;
     const razorpayOrder = await razorpay.orders.create({
       amount: amount * 100,
@@ -11,6 +12,7 @@ router.post("/razorpay", async (req, res) => {
       receipt: `rcpt_${Date.now()}`,
       payment_capture: 1,
     });
+    console.log("Razorpay Order Created:", razorpayOrder); // Debugging line
     return res.status(200).json({
       success: true,
       data: {

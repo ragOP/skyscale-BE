@@ -1,0 +1,117 @@
+const express = require("express");
+const router = express.Router();
+const orderModel = require("../../models/orderModel13");
+const crypto = require("crypto");
+
+router.post("/create-order", async (req, res) => {
+  const {
+    amount,
+    orderId,
+    name,
+    email,
+    phone,
+    dateOfBirth,
+    gender,
+    placeOfBirth,
+    prefferedDateAndTime,
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature,
+    additionalProducts = [],
+  } = req.body;
+  try {
+    const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET);
+    hmac.update(razorpayOrderId + "|" + razorpayPaymentId);
+    const generatedSignature = hmac.digest("hex");
+
+    if (generatedSignature !== razorpaySignature) {
+      return res.status(400).json({
+        success: false,
+        data: null,
+        message: "Invalid Payment",
+      });
+    }
+
+    const existingOrder = await orderModel.findOne({ orderId });
+              if (existingOrder) {
+              return res.status(200).json({
+                success: true,
+                data: existingOrder,
+              });
+            }
+    const payload = {
+      amount,
+      orderId,
+      fullName: name,
+      email,
+      phoneNumber: phone,
+      dob: dateOfBirth,
+      gender,
+      placeOfBirth,
+      razorpayOrderId,
+      prefferedDateAndTime,
+      razorpayPaymentId,
+      additionalProducts,
+      razorpaySignature,
+    };
+    const order = await orderModel.create(payload);
+    return res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/get-orders", async (req, res) => {
+  const orders = await orderModel.find({}).sort({ createdAt: -1 });
+  return res.status(200).json({
+    success: true,
+    data: orders,
+  });
+});
+
+router.get("/get-order/main", async (req, res) => {
+  const { page = 1, limit = 100 } = req.query;
+  try {
+    const orders = await orderModel
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+    return res.status(200).json({
+      success: true,
+      data: {
+        orders,
+        currentPage: page,
+        totalPages: Math.ceil((await orderModel.countDocuments()) / limit),
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.patch("/delivery-status/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deliveryStatusEmail = req.body.deliveryStatusEmail;
+
+    const order = await orderModel.findByIdAndUpdate(
+      id,
+      { deliveryStatusEmail: deliveryStatusEmail },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+module.exports = router;
