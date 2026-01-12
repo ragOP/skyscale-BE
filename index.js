@@ -22,6 +22,7 @@ app.get("/", (req, res) => {
 
 // /api/payment/razorpay
 app.use("/api/payment", require("./routers/payment/index"));
+app.use("/api/payment2", require("./routers/payment2/index"));
 
 // ------ Astra Soul -----//
 app.use("/api/lander1", require("./routers/lander1/index"));
