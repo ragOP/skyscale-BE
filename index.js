@@ -33,6 +33,9 @@ app.use("/api/lander2", require("./routers/lander2/index"));
 // ----- SoulMate -----//
 app.use("/api/lander3", require("./routers/lander3/index"));
 
+// ----- Lander69 (Razorpay Live) -----//
+app.use("/api/lander69", require("./routers/lander69/index"));
+
 // ---- Signature -----//
 app.use("/api/lander4", require("./routers/lander4/index"));
 
