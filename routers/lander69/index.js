@@ -58,9 +58,14 @@ router.post("/create-order", async (req, res) => {
     dob,
     gender,
     placeOfBirth,
+    // camelCase (some of your landers use this)
     razorpayOrderId,
     razorpayPaymentId,
     razorpaySignature,
+    // snake_case (Razorpay default fields from frontend)
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
     additionalProducts = [],
   } = req.body;
 
@@ -73,11 +78,23 @@ router.post("/create-order", async (req, res) => {
       });
     }
 
+    const rpOrderId = razorpayOrderId || razorpay_order_id;
+    const rpPaymentId = razorpayPaymentId || razorpay_payment_id;
+    const rpSignature = razorpaySignature || razorpay_signature;
+
+    if (!rpOrderId || !rpPaymentId || !rpSignature) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Missing Razorpay fields. Required: razorpayOrderId/razorpay_order_id, razorpayPaymentId/razorpay_payment_id, razorpaySignature/razorpay_signature",
+      });
+    }
+
     const hmac = crypto.createHmac("sha256", secret);
-    hmac.update(String(razorpayOrderId || "") + "|" + String(razorpayPaymentId || ""));
+    hmac.update(String(rpOrderId) + "|" + String(rpPaymentId));
     const generatedSignature = hmac.digest("hex");
 
-    if (generatedSignature !== razorpaySignature) {
+    if (generatedSignature !== rpSignature) {
       return res.status(400).json({
         success: false,
         data: null,
@@ -86,7 +103,7 @@ router.post("/create-order", async (req, res) => {
     }
 
     const resolvedOrderId =
-      orderId || razorpayOrderId || `ORDER_${Date.now()}`;
+      orderId || rpOrderId || `ORDER_${Date.now()}`;
 
     const existingOrder = await Order69.findOne({ orderId: resolvedOrderId });
     if (existingOrder) {
@@ -105,9 +122,9 @@ router.post("/create-order", async (req, res) => {
       dob: dob || dateOfBirth || "",
       gender: gender || "",
       placeOfBirth: placeOfBirth || "",
-      razorpayOrderId: razorpayOrderId || "",
-      razorpayPaymentId: razorpayPaymentId || "",
-      razorpaySignature: razorpaySignature || "",
+      razorpayOrderId: rpOrderId || "",
+      razorpayPaymentId: rpPaymentId || "",
+      razorpaySignature: rpSignature || "",
       additionalProducts,
     };
 
