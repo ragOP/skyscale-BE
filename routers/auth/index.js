@@ -4,9 +4,11 @@ const orderModel = require('../../models/orderModel');
 const orderMode2 = require('../../models/oderModel2');
 const orderMode3 = require('../../models/oderModel3');
 const orderMode7 = require('../../models/orderModel7');
+const orderModel777 = require('../../models/orderModel777');
 const abondentOrder2 = require('../../models/abondentOrder2');
 const oderModel3ABD = require('../../models/oderModel3-abd');
 const orderModel7ABD = require('../../models/orderModel7-abd');
+const orderModel777ABD = require('../../models/orderModel777-abd');
 const passwordModel = require('../../models/passwords');
 
 const router = express.Router();
@@ -75,6 +77,8 @@ router.route("/get-stats/record").get(async (req, res) => {
         const lander3Count = lander3.length;
         const lander7 = await orderMode7.find(query).select("createdAt");
         const lander7Count = lander7.length;
+        const lander777 = await orderModel777.find(query).select("createdAt");
+        const lander777Count = lander777.length;
         return res.status(200).json({ message: 'User statistics retrieved successfully', stats: { lander1:{
             count: lander1Count,
             title: "Astra Soul",
@@ -91,6 +95,10 @@ router.route("/get-stats/record").get(async (req, res) => {
             count: lander7Count,
             title: "Easy Astro Exp",
             lastOrderTime: lander7.length ? lander7[lander7.length - 1].createdAt : null
+        }, lander777: {
+            count: lander777Count,
+            title: "Lander 777",
+            lastOrderTime: lander777.length ? lander777[lander777.length - 1].createdAt : null
         }, lander8: {
             count: lander3Count,
             title: "Soul Mate Sketch",
@@ -112,7 +120,8 @@ router.route("/get-stats/abandoned").get(async (req, res) => {
         const lander3Count = lander3.length;
         const lander7 = await orderModel7ABD.find(query).select("createdAt");
         const lander7Count = lander7.length;
-        console.log("lander7", lander7);
+        const lander777 = await orderModel777ABD.find(query).select("createdAt");
+        const lander777Count = lander777.length;
         return res.status(200).json({ message: 'User statistics retrieved successfully', stats: { lander2: {
             count: lander2Count,
             title: "AstraSoul Love",
@@ -125,6 +134,10 @@ router.route("/get-stats/abandoned").get(async (req, res) => {
             count: lander7Count,
             title: "Easy Astro Exp",
             lastOrderTime: lander7.length ? lander7[lander7.length - 1].createdAt : null
+        }, lander777: {
+            count: lander777Count,
+            title: "Lander 777",
+            lastOrderTime: lander777.length ? lander777[lander777.length - 1].createdAt : null
         }, lander8: {
             count: lander3Count,
             title: "Soul Mate Sketch",
