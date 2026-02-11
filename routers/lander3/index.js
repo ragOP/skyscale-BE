@@ -184,7 +184,7 @@ router.post("/create-order", async (req, res) => {
   }
 });
 
-router.post("/success", async (req, res) => {
+router.get("/success", async (req, res) => {
   try {
     const { txnid, email, phone } = req.query;
     if (!txnid) {
@@ -242,20 +242,6 @@ router.post("/success", async (req, res) => {
 
     const order = await orderModel3.create(payload);
 
-    (async () => {
-      if (email) {
-        await sendAndLogConfirmationEmailResend({
-          email: txn.email,
-          name: txn.firstname || "Customer",
-          orderId: txn.txnid || `ORDER_${Date.now()}`,
-          amount: txn.amt || txn.transaction_amount,
-          additionalProducts: sperateAdditionalProducts,
-        });
-      } else {
-        console.warn("[order-email] No email found; skipping Resend + log");
-      }
-    })();
-
     return res.redirect(302, `https://www.easyastro.in/success?txnid=${txnid}`);
   } catch (err) {
     console.error("create-order error:", err);
@@ -292,26 +278,6 @@ router.post("/create-order-abd", async (req, res) => {
     };
     const order = await orderModel3Abd.create(payload);
 
-    if (order) {
-      const response = await fetch(
-        "https://scheduler-easy-astro.onrender.com/api/schedule-job/create",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
-
-      if (!response.ok) {
-        console.error(
-          "Scheduler service responded with error:",
-          response.statusText
-        );
-      } else {
-        console.log("Scheduled job successfully");
-      }
-    }
-
     return res.status(200).json({ success: true, data: order });
   } catch (error) {
     console.error("create-order-abd error:", error);
@@ -331,25 +297,6 @@ router.delete("/delete-order-abd", async (req, res) => {
 
   try {
     const result = await orderModel3Abd.deleteMany({ email });
-
-    const response = await fetch(
-      "https://scheduler-easy-astro.onrender.com/api/schedule-job/delete",
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      }
-    );
-    if (!response.ok) {
-      console.error(
-        "Scheduler service responded with error:",
-        response.statusText
-      );
-    } else {
-      console.log("Scheduled job successfully");
-    }
     return res.status(200).json({
       success: true,
       deletedCount: result.deletedCount,
