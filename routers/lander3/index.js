@@ -184,7 +184,7 @@ router.post("/create-order", async (req, res) => {
   }
 });
 
-router.get("/success", async (req, res) => {
+router.post("/success", async (req, res) => {
   try {
     const { txnid, email, phone } = req.query;
     if (!txnid) {
