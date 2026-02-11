@@ -370,19 +370,61 @@ router.post("/create-order-phonepe", async (req, res) => {
 });
 
 /**
- * GET /api/lander3/get-orders
+ * GET /api/lander3/get-orders (paginated for record page)
+ * Query: page (default 1), limit (default 100, max 500)
+ * Response: { success, data: { orders, currentPage, totalPages, totalCount } }
  */
 router.get("/get-orders", async (req, res) => {
-  const orders = await orderModel3.find({}).sort({ createdAt: -1 });
-  return res.status(200).json({ success: true, data: orders });
+  try {
+    let page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    let limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 100));
+    const totalCount = await orderModel3.countDocuments();
+    const orders = await orderModel3
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+    return res.status(200).json({
+      success: true,
+      data: {
+        orders,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        totalCount,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 /**
- * GET /api/lander3/get-orders-abd
+ * GET /api/lander3/get-orders-abd (paginated)
+ * Query: page (default 1), limit (default 100, max 500)
+ * Response: { success, data: { orders, currentPage, totalPages, totalCount } }
  */
 router.get("/get-orders-abd", async (req, res) => {
-  const orders = await orderModel3Abd.find({}).sort({ createdAt: -1 });
-  return res.status(200).json({ success: true, data: orders });
+  try {
+    let page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    let limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 100));
+    const totalCount = await orderModel3Abd.countDocuments();
+    const orders = await orderModel3Abd
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+    return res.status(200).json({
+      success: true,
+      data: {
+        orders,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        totalCount,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 /**
