@@ -45,4 +45,19 @@ router.get("/get-log-by-path", async (req, res) => {
     }
 });
 
+router.get("/get-all-data", async (req, res) => { 
+    try {
+        const logs = await Log.find({});
+
+        return res.status(200).json({ 
+            success: true, 
+            data: logs 
+        });
+    } catch (error) {
+        console.log("get-all-data error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+
 module.exports = router;
