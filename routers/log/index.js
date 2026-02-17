@@ -5,11 +5,11 @@ const router = express.Router();
 
 router.post("/log-path", async (req, res) => {
     try {
-        const { path } = req.body;
+        const { path, timestamp } = req.body;
         if (!path) {
             return res.status(400).json({ error: "Path is required" });
         }
-        const logEntry = new Log({ path });
+        const logEntry = new Log({ path, timestamp });
         await logEntry.save();
         return res.status(200).json({ success: true, data: logEntry });
     } catch (error) {
