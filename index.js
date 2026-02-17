@@ -74,6 +74,8 @@ app.use("/api/lander21", require("./routers/lander21/index"));
 
   app.use("/api/lander111", require("./routers/lander111/index"));
 
+app.use("/api/log", require("./routers/log/index"));
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
