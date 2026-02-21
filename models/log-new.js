@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
-const logSchema2 = new mongoose.Schema({
+const logSchema3 = new mongoose.Schema({
     path: { type: String, required: true },
     timestamp: { type: String, required: true }
 });
 
-const Log2 = mongoose.model('Log2', logSchema2);
+const Log3 = mongoose.model('Log3', logSchema3);
 
-module.exports = Log2;
+module.exports = Log3;
