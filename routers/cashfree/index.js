@@ -36,7 +36,7 @@ const createCashfreeSession = async (req, res) => {
     );
     console.log("Order ID:", orderId);
 
-    let returnUrl = `${finalUrl}?orderId=${orderId}&orderType=${orderType}&fullName=${encodeURIComponent(fullName)}&email=${encodeURIComponent(email)}&phoneNumber=${encodeURIComponent(phoneNumber)}&amount=${amount}&profession=${encodeURIComponent(profession)}&remarks=${encodeURIComponent(remarks)}`;
+    let returnUrl = `${finalUrl}?orderId=${orderId}&orderType=${orderType}&fullName=${encodeURIComponent(fullName)}&email=${encodeURIComponent(email)}&phoneNumber=${encodeURIComponent(phoneNumber)}&amount=${amount}&profession=${encodeURIComponent(profession)}&remarks=${encodeURIComponent(remarks)}&additionalProducts=${encodeURIComponent(additionalProducts ? additionalProducts.join(",") : "")}`;
 
     const requestData = {
       order_id: orderId,
