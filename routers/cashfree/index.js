@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const MAIN_URL = "https://www.thesignaturestudio.in";
+const MAIN_URL = "https://www.easyastro.in";
 const CASHFREE_URL =
   process.env.CASHFREE_URL || "https://sandbox.cashfree.com/pg";
 
@@ -21,7 +21,7 @@ const createCashfreeSession = async (req, res) => {
 
     const orderId = `order_${Date.now()}`;
 
-    const cartUrl = `${MAIN_URL}/confirmation`;
+    const cartUrl = `${MAIN_URL}/order-confirmation`;
 
     const finalUrl = url ? url : cartUrl;
 
